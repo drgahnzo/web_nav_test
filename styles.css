@@ -1,0 +1,241 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #fff;
+  font-family: sans-serif;
+  position: relative;
+  /* Faster taps; pair with touch handlers for custom long-press */
+  touch-action: manipulation;
+}
+
+/*
+ * While a touch-based ring hold is in progress, block iOS/Android text selection
+ * and the system callout / “Look up” sheet that hijacks long-press.
+ */
+html.ring-nav-hold-pending,
+html.ring-nav-hold-pending * {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.page-title {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 1rem 1.25rem;
+  padding: 0;
+  font-size: 16pt;
+  font-weight: normal;
+  line-height: 1.2;
+}
+
+/*
+ * Site nav: built once in `site-nav.js` as `#site-nav`, injected into each page’s
+ * `#site-nav-root`. Visually hidden here but used by the Options Ring and AT.
+ */
+.nav {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.nav a {
+  color: #000;
+}
+
+.nav a[aria-current="page"] {
+  text-decoration: none;
+}
+
+.nav-branch .nav-branch-children {
+  margin-left: 1.75rem;
+  padding-left: 0.75rem;
+}
+
+.nav-branch .nav-branch-children a {
+  display: block;
+}
+
+body.ring-nav-active {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.ring-nav-root {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  font-family: sans-serif;
+  color: #111;
+  transform: scale(0);
+  transform-origin: center center;
+  transition: transform 0.3s ease-out;
+}
+
+.ring-nav-root.ring-nav-root--visible {
+  transform: scale(1);
+}
+
+.ring-nav-rotator {
+  position: absolute;
+  inset: 0;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.ring-nav-interstitial {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ring-nav-interstitial-rotator {
+  position: absolute;
+  inset: 0;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.ring-nav-mark {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(17, 17, 17, 0.35);
+}
+
+.ring-nav-mark--dot {
+  width: 2px;
+  height: 2px;
+  border-radius: 2px;
+}
+
+.ring-nav-mark--dash {
+  width: 6px;
+  height: 1px;
+  border-radius: 1px;
+}
+
+.ring-char-slot {
+  position: absolute;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Islands so the pointer cursor and :hover apply while over a navigable glyph */
+.ring-char-slot[data-nav-href] {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.ring-char-inner {
+  display: inline-block;
+  white-space: pre;
+  transform-origin: center center;
+  opacity: 1;
+  --ring-scale: 1;
+  transform: scale(var(--ring-scale));
+  transition:
+    transform 0.08s ease-out,
+    opacity 0.08s ease-out;
+}
+
+.ring-char-slot--pipe .ring-char-inner {
+  display: inline-block;
+  width: 5.36px;
+  height: 14px;
+  border-radius: 1px;
+  background: linear-gradient(to left, rgba(17, 17, 17, 1), rgba(17, 17, 17, 0));
+}
+
+.ring-nav-rotator[data-rot-dir="ccw"] .ring-char-slot--pipe .ring-char-inner {
+  background: linear-gradient(to right, rgba(17, 17, 17, 1), rgba(17, 17, 17, 0));
+}
+
+.ring-char-slot--hover .ring-char-inner {
+  --ring-scale: 1.15;
+}
+
+.ring-char-slot--picked .ring-char-inner {
+  --ring-scale: 2;
+  opacity: 0;
+  transition:
+    transform 0.25s ease-out,
+    opacity 0.25s ease-out;
+}
+
+.ring-nav-spokes {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ring-nav-spoke-group {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ring-nav-child-slot {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.3s ease-out;
+}
+
+.ring-nav-child-inner {
+  display: inline-block;
+  white-space: pre;
+  pointer-events: none;
+  transform-origin: center center;
+  opacity: 1;
+  --ring-scale: 1;
+  transform: scale(var(--ring-scale));
+}
+
+/* Picked class on slot so inline opacity on inner can be cleared (matches .ring-char-slot--picked) */
+.ring-nav-child-slot--picked .ring-nav-child-inner {
+  --ring-scale: 2;
+  opacity: 0;
+  transition:
+    transform 0.25s ease-out,
+    opacity 0.25s ease-out;
+}
+
+main {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem 6rem;
+}
+
+.ipsum {
+  max-width: 36em;
+  margin: 0;
+  font-size: 12pt;
+  line-height: 1.5;
+  color: #111;
+}
+
+.hold {
+  position: absolute;
+  bottom: 18%;
+  right: 12%;
+  margin: 0;
+  font-size: 12pt;
+  color: #111;
+}
